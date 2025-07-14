@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCV Payment Connect - 2 Minuten Challenge</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(90deg, #2a5298, #1e3c72);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .brand {
+            background: white;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #2a5298;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2a5298;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .game-area {
+            height: 500px;
+            background: linear-gradient(135deg, #e8f4fd 0%, #d6e9ff 100%);
+            border-radius: 15px;
+            border: 3px solid #2a5298;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(42, 82, 152, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .start-screen.hidden {
+            display: none;
+        }
+        
+        .start-title {
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px;
+            max-width: 500px;
+        }
+        
+        .start-button {
+            background: linear-gradient(145deg, #ff6b35, #e55100);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px;
+            box-shadow: 0 8px 25px rgba(229, 81, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(229, 81, 0, 0.5);
+        }
+        
+        .queue-area {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            width: 250px;
+            height: 460px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid #2a5298;
+        }
+        
+        .queue-title {
+            text-align: center;
+            font-weight: bold;
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .customer {
+            width: 100%;
+            height: 60px;
+            margin: 10px 0;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .customer:hover {
+            transform: scale(1.05);
+        }
+        
+        .customer.selected {
+            border: 4px solid #ff6b35;
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.5);
+        }
+        
+        .customer.urgent {
+            animation: urgentPulse 1s infinite;
+        }
+        
+        @keyframes urgentPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 3px 10px rgba(0,0,0,0.2); 
+            }
+            50% { 
+                transform: scale(1.05); 
+                box-shadow: 0 5px 20px rgba(231, 76, 60, 0.6); 
+            }
+        }
+        
+        .customer-icon {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+        
+        .customer-timer {
+            font-size: 11px;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+        
+        .terminals-area {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 300px;
+            height: 460px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .terminal {
+            background: linear-gradient(145deg, #2a5298, #1e3c72);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            border: 3px solid #fff;
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .terminal:hover {
+            transform: scale(1.05);
+        }
+        
+        .terminal.busy {
+            background: linear-gradient(145deg, #ff6b35, #e55100);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .terminal-title {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .terminal-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .terminal-type {
+            font-size: 10px;
+            text-align: center;
+        }
+        
+        .phone-terminal {
+            grid-column: 1 / -1;
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+        }
+        
+        .phone-terminal.ringing {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            animation: shake 0.5s infinite;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+        
+        .feedback {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+        
+        .feedback.show {
+            opacity: 1;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            z-index: 2000;
+        }
+        
+        .final-score {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .restart-button {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .restart-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .chaos-meter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            border: 2px solid #2a5298;
+            overflow: hidden;
+        }
+        
+        .chaos-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #f39c12, #e74c3c);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .chaos-label {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: #2a5298;
+            font-size: 14px;
+        }
+        
+        .phase-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 500;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .time-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="brand">
+                CCV is now part of fiserv.
+            </div>
+            <h1>Payment Connect Challenge</h1>
+            <div class="time-display" id="timeDisplay">2:00</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="scoreDisplay">0</div>
+                <div class="stat-label">Score</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="customersDisplay">0</div>
+                <div class="stat-label">Geholpen</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="comboDisplay">0</div>
+                <div class="stat-label">Max Combo</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="phoneDisplay">0</div>
+                <div class="stat-label">Telefoon</div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <!-- Start Screen -->
+            <div class="start-screen" id="startScreen">
+                <div class="start-title">🚀 2-Minuten CCV Challenge!</div>
+                
+                <div class="instructions">
+                    <h3 style="margin-bottom: 15px;">🎯 CCV Rush Challenge!</h3>
+                    <p style="margin-bottom: 10px;"><strong>Simpel:</strong></p>
+                    <p style="margin-bottom: 8px;">1️⃣ Klik op een klant in de wachtrij</p>
+                    <p style="margin-bottom: 8px;">2️⃣ Klik op een vrije CCV terminal</p>
+                    <p style="margin-bottom: 8px;">📞 Beantwoord rinkelde telefoon voor bonus!</p>
+                    <br>
+                    <p style="margin-bottom: 8px;"><strong>⚠️ Let op:</strong></p>
+                    <p style="margin-bottom: 8px;">• Klanten worden ongeduldig (rood)</p>
+                    <p style="margin-bottom: 8px;">• Terminals zijn even bezet na gebruik</p>
+                    <p style="margin-bottom: 8px;">• Steeds meer klanten = chaos!</p>
+                    <br>
+                    <p><strong>🚀 Overleef 2 minuten!</strong></p>
+                </div>
+                
+                <button class="start-button" onclick="startGame()">🎮 Start Challenge!</button>
+            </div>
+            
+            <!-- Customer Queue -->
+            <div class="queue-area">
+                <div class="queue-title">👥 Wachtrij</div>
+                <div id="customerQueue"></div>
+            </div>
+            
+            <!-- Terminals -->
+            <div class="terminals-area">
+                <div class="terminal" id="terminal1">
+                    <div class="terminal-title">CCV Terminal 1</div>
+                    <div class="terminal-icon">🏪</div>
+                    <div class="terminal-type">Betaalservice</div>
+                </div>
+                
+                <div class="terminal" id="terminal2">
+                    <div class="terminal-title">CCV Terminal 2</div>
+                    <div class="terminal-icon">💳</div>
+                    <div class="terminal-type">Betaalservice</div>
+                </div>
+                
+                <div class="terminal phone-terminal" id="phoneTerminal">
+                    <div class="terminal-title">Support Telefoon</div>
+                    <div class="terminal-icon">📞</div>
+                    <div class="terminal-type">Klik wanneer hij rinkelt!</div>
+                </div>
+            </div>
+            
+            <!-- Chaos Meter -->
+            <div class="chaos-label">Chaos Level</div>
+            <div class="chaos-meter">
+                <div class="chaos-fill" id="chaosFill"></div>
+            </div>
+            
+            <!-- Phase Indicator -->
+            <div class="phase-indicator" id="phaseIndicator">WEEK 1</div>
+            
+            <!-- Feedback -->
+            <div class="feedback" id="feedback">+25 punten!</div>
+            
+            <!-- Game Over Screen -->
+            <div class="game-over" id="gameOver">
+                <h2>⏰ Tijd is om!</h2>
+                <div class="final-score" id="finalScore">847</div>
+                <div id="finalRating">🔥 CCV Expert!</div>
+                <div style="margin: 20px 0;">
+                    <div>👥 Klanten geholpen: <span id="finalCustomers">12</span></div>
+                    <div>🔥 Beste combo: <span id="finalCombo">x5</span></div>
+                    <div>📞 Telefoons: <span id="finalPhones">3</span></div>
+                </div>
+                <button class="restart-button" onclick="restartGame()">🔄 Nog een keer!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game variables - SIMPLE!
+        let gameActive = false;
+        let timeLeft = 120;
+        let score = 0;
+        let customersServed = 0;
+        let phonesAnswered = 0;
+        let combo = 0;
+        let maxCombo = 0;
+        let customers = [];
+        let terminals = [false, false]; // busy status for 2 terminals
+        let phoneRinging = false;
+        let selectedCustomer = null;
+        let currentPhase = 'week1';
+        let chaosLevel = 0;
+        
+        let gameTimer;
+        let customerSpawner;
+        let phoneSpawner;
+        
+        // Game phases with escalating difficulty
+        const gamePhases = {
+            week1: { duration: 30, spawnRate: 8000, name: '📅 WEEK 1 - Rustig' },
+            week2: { duration: 30, spawnRate: 5000, name: '📅 WEEK 2 - Drukker' },
+            week3: { duration: 30, spawnRate: 3000, name: '📅 WEEK 3 - Hectisch' },
+            blackfriday: { duration: 30, spawnRate: 2000, name: '🔥 BLACK FRIDAY!' }
+        };
+        
+        function startGame() {
+            console.log("Starting CCV Rush!");
+            
+            // Reset everything
+            gameActive = true;
+            timeLeft = 120;
+            score = 0;
+            customersServed = 0;
+            phonesAnswered = 0;
+            combo = 0;
+            maxCombo = 0;
+            customers = [];
+            terminals = [false, false];
+            phoneRinging = false;
+            selectedCustomer = null;
+            currentPhase = 'week1';
+            chaosLevel = 0;
+            
+            // Hide start screen
+            document.getElementById('startScreen').classList.add('hidden');
+            
+            // Show first phase
+            showPhase('📅 WEEK 1 - Rustig');
+            
+            // Start timers
+            startMainTimer();
+            startCustomerSpawning();
+            startPhoneSpawning();
+            
+            updateDisplay();
+            console.log("CCV Rush started!");
+        }
+        
+        function startMainTimer() {
+            gameTimer = setInterval(function() {
+                if (!gameActive) return;
+                
+                timeLeft--;
+                updateDisplay();
+                
+                // Phase transitions
+                if (timeLeft === 90 && currentPhase === 'week1') {
+                    currentPhase = 'week2';
+                    showPhase('📅 WEEK 2 - Drukker');
+                    updateCustomerSpawning();
+                } else if (timeLeft === 60 && currentPhase === 'week2') {
+                    currentPhase = 'week3';
+                    showPhase('📅 WEEK 3 - Hectisch');
+                    updateCustomerSpawning();
+                } else if (timeLeft === 30 && currentPhase === 'week3') {
+                    currentPhase = 'blackfriday';
+                    showPhase('🔥 BLACK FRIDAY!');
+                    updateCustomerSpawning();
+                }
+                
+                // Update customer timers
+                customers.forEach(function(customer, index) {
+                    customer.timeLeft--;
+                    
+                    // Make customer urgent when time is running out
+                    if (customer.timeLeft <= 5) {
+                        customer.urgent = true;
+                    }
+                    
+                    if (customer.timeLeft <= 0) {
+                        customers.splice(index, 1);
+                        showFeedback('Klant weggelopen! -10 punten');
+                        score = Math.max(0, score - 10);
+                        combo = 0;
+                        if (selectedCustomer && selectedCustomer.id === customer.id) {
+                            selectedCustomer = null;
+                        }
+                    }
+                });
+                
+                // Update chaos level
+                updateChaosLevel();
+                updateCustomerDisplay();
+                
+                // Game over if chaos too high
+                if (chaosLevel >= 100) {
+                    showFeedback('CHAOS OVERLOAD!');
+                    setTimeout(endGame, 1000);
+                }
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+        
+        function updateCustomerSpawning() {
+            clearInterval(customerSpawner);
+            startCustomerSpawning();
+        }
+        
+        function startCustomerSpawning() {
+            const phase = gamePhases[currentPhase];
+            
+            // Spawn first customer quickly
+            setTimeout(addCustomer, 1000);
+            
+            // Then spawn regularly based on phase
+            customerSpawner = setInterval(function() {
+                if (gameActive && customers.length < 8) {
+                    addCustomer();
+                }
+            }, phase.spawnRate);
+        }
+        
+        function startPhoneSpawning() {
+            phoneSpawner = setInterval(function() {
+                if (gameActive && !phoneRinging && Math.random() < 0.4) {
+                    console.log("Spawning phone call");
+                    startPhoneRing();
+                }
+            }, 6000); // Reduced from 12000 to 6000 for more frequent calls
+        }
+        
+        function addCustomer() {
+            if (customers.length >= 8) return;
+            
+            const customer = {
+                id: Date.now() + Math.random(),
+                icon: '💳',
+                timeLeft: 15,
+                points: 15,
+                urgent: false
+            };
+            
+            customers.push(customer);
+            updateCustomerDisplay();
+        }
+        
+        function updateCustomerDisplay() {
+            const queue = document.getElementById('customerQueue');
+            queue.innerHTML = '';
+            
+            customers.forEach(function(customer) {
+                const div = document.createElement('div');
+                div.className = 'customer';
+                
+                // Color based on urgency and selection
+                if (selectedCustomer && selectedCustomer.id === customer.id) {
+                    div.className += ' selected';
+                } else if (customer.urgent) {
+                    div.className += ' urgent';
+                    div.style.background = 'linear-gradient(145deg, #e74c3c, #c0392b)';
+                } else {
+                    div.style.background = 'linear-gradient(145deg, #3498db, #2980b9)';
+                }
+                
+                div.onclick = function() { selectCustomer(customer); };
+                div.innerHTML = 
+                    '<div class="customer-icon">' + customer.icon + '</div>' +
+                    '<div class="customer-timer">' + customer.timeLeft + 's</div>';
+                queue.appendChild(div);
+            });
+        }
+        
+        function selectCustomer(customer) {
+            // Deselect previous
+            selectedCustomer = null;
+            
+            // Select new customer
+            selectedCustomer = customer;
+            updateCustomerDisplay();
+            
+            showFeedback('Klant geselecteerd! Kies een terminal.');
+        }
+        
+        function useTerminal(terminalNumber) {
+            console.log('Using terminal:', terminalNumber);
+            
+            // Extra check for terminal 3
+            if (terminalNumber === 3) {
+                console.log('Terminal 3 specifically called!');
+            }
+            
+            const terminalIndex = terminalNumber - 1;
+            
+            if (terminals[terminalIndex]) {
+                showFeedback('Terminal is bezet!');
+                console.log('Terminal', terminalNumber, 'is busy');
+                return;
+            }
+            
+            if (!selectedCustomer) {
+                showFeedback('Selecteer eerst een klant!');
+                console.log('No customer selected for terminal', terminalNumber);
+                return;
+            }
+            
+            console.log('Serving customer at terminal', terminalNumber);
+            serveCustomer(selectedCustomer, terminalNumber);
+        }
+        
+        function serveCustomer(customer, terminalNumber) {
+            // Remove customer from queue
+            const index = customers.findIndex(c => c.id === customer.id);
+            if (index === -1) return;
+            
+            customers.splice(index, 1);
+            selectedCustomer = null;
+            
+            // Calculate points
+            let points = customer.points + customer.timeLeft * 2;
+            
+            // Combo bonus
+            combo++;
+            if (combo > 1) {
+                const multiplier = Math.min(combo, 5);
+                points *= multiplier;
+                showFeedback('COMBO x' + combo + '! +' + points + ' punten!');
+            } else {
+                showFeedback('+' + points + ' punten!');
+            }
+            
+            maxCombo = Math.max(maxCombo, combo);
+            score += points;
+            customersServed++;
+            
+            // Set terminal busy
+            const terminalIndex = terminalNumber - 1;
+            terminals[terminalIndex] = true;
+            document.getElementById('terminal' + terminalNumber).classList.add('busy');
+            
+            setTimeout(function() {
+                terminals[terminalIndex] = false;
+                document.getElementById('terminal' + terminalNumber).classList.remove('busy');
+            }, 3000);
+            
+            updateCustomerDisplay();
+            updateDisplay();
+        }
+        
+        function updateChaosLevel() {
+            // Chaos based on queue length and urgent customers
+            const queuePressure = (customers.length / 8) * 60;
+            const urgentPressure = customers.filter(c => c.urgent).length * 15;
+            const phonePressure = phoneRinging ? 25 : 0;
+            
+            chaosLevel = Math.min(100, queuePressure + urgentPressure + phonePressure);
+            
+            document.getElementById('chaosFill').style.width = chaosLevel + '%';
+        }
+        
+        function showPhase(phaseName) {
+            const indicator = document.getElementById('phaseIndicator');
+            indicator.textContent = phaseName;
+            indicator.classList.add('show');
+            
+            setTimeout(function() {
+                indicator.classList.remove('show');
+            }, 3000);
+        }
+        
+        function startPhoneRing() {
+            console.log("Starting phone ring");
+            phoneRinging = true;
+            const phoneElement = document.getElementById('phoneTerminal');
+            if (phoneElement) {
+                phoneElement.classList.add('ringing');
+                console.log("Phone is now ringing");
+            }
+            
+            setTimeout(function() {
+                if (phoneRinging) {
+                    console.log("Phone timeout - missed call");
+                    phoneRinging = false;
+                    const phoneElement = document.getElementById('phoneTerminal');
+                    if (phoneElement) {
+                        phoneElement.classList.remove('ringing');
+                    }
+                    showFeedback('Gemiste oproep! -15 punten');
+                    score = Math.max(0, score - 15);
+                    combo = 0;
+                    updateDisplay();
+                }
+            }, 8000);
+        }
+        
+        function answerPhone() {
+            console.log("Answer phone clicked, phoneRinging:", phoneRinging);
+            if (!phoneRinging) {
+                console.log("Phone not ringing, ignoring click");
+                return;
+            }
+            
+            console.log("Answering phone");
+            phoneRinging = false;
+            const phoneElement = document.getElementById('phoneTerminal');
+            if (phoneElement) {
+                phoneElement.classList.remove('ringing');
+            }
+            
+            score += 20;
+            phonesAnswered++;
+            combo++;
+            
+            showFeedback('Telefoon beantwoord! +20 punten!');
+            updateDisplay();
+            console.log("Phone answered successfully");
+        }
+        
+        function showFeedback(message) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.classList.add('show');
+            
+            setTimeout(function() {
+                feedback.classList.remove('show');
+            }, 2500);
+        }
+        
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timeDisplay').textContent = 
+                minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+            
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('customersDisplay').textContent = customersServed;
+            document.getElementById('comboDisplay').textContent = maxCombo;
+            document.getElementById('phoneDisplay').textContent = phonesAnswered;
+        }
+        
+        function endGame() {
+            gameActive = false;
+            
+            // Clear timers
+            clearInterval(gameTimer);
+            clearInterval(customerSpawner);
+            clearInterval(phoneSpawner);
+            
+            // Clear phone state
+            phoneRinging = false;
+            document.getElementById('phoneTerminal').classList.remove('ringing');
+            
+            // Show results
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalCustomers').textContent = customersServed;
+            document.getElementById('finalCombo').textContent = 'x' + maxCombo;
+            document.getElementById('finalPhones').textContent = phonesAnswered;
+            
+            // Rating based on survival and score
+            let rating = '';
+            if (timeLeft > 0) {
+                // Survived the full 2 minutes!
+                if (score >= 800) rating = '🏆 CCV LEGEND!';
+                else if (score >= 600) rating = '🔥 CCV MASTER!';
+                else if (score >= 400) rating = '⭐ CCV EXPERT!';
+                else rating = '💪 SURVIVOR!';
+            } else {
+                // Time ran out normally
+                if (score >= 600) rating = '🔥 CCV EXPERT!';
+                else if (score >= 400) rating = '⭐ CCV PRO!';
+                else if (score >= 200) rating = '👍 Goed gedaan!';
+                else rating = '💪 Volgende keer beter!';
+            }
+            
+            document.getElementById('finalRating').textContent = rating;
+            document.getElementById('gameOver').style.display = 'flex';
+        }
+        
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('startScreen').classList.remove('hidden');
+            
+            // Reset terminal states - Only terminals 1 and 2
+            for (let i = 1; i <= 2; i++) {
+                const terminal = document.getElementById('terminal' + i);
+                if (terminal) {
+                    terminal.classList.remove('busy');
+                }
+            }
+            
+            // Reset phone state
+            document.getElementById('phoneTerminal').classList.remove('ringing');
+        }
+        
+        // Initialize
+        updateDisplay();
+        
+        // Add event listeners when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Adding all event listeners...");
+            
+            // Terminal event listeners
+            const terminal1 = document.getElementById('terminal1');
+            const terminal2 = document.getElementById('terminal2'); 
+            
+            if (terminal1) {
+                terminal1.addEventListener('click', function() {
+                    console.log("Terminal 1 clicked!");
+                    useTerminal(1);
+                });
+                console.log("Terminal 1 event listener added");
+            }
+            
+            if (terminal2) {
+                terminal2.addEventListener('click', function() {
+                    console.log("Terminal 2 clicked!");
+                    useTerminal(2);
+                });
+                console.log("Terminal 2 event listener added");
+            }
+            
+            // Phone event listener
+            const phoneElement = document.getElementById('phoneTerminal');
+            if (phoneElement) {
+                phoneElement.addEventListener('click', function() {
+                    console.log("Phone clicked!");
+                    answerPhone();
+                });
+                console.log("Phone event listener added");
+            }
+        });
+        
+        console.log("CCV Rush loaded and ready!");
+    </script>oon! +15 punten!');
+            updateDisplay();
+        }
+        
+        function showFeedback(message) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.classList.add('show');
+            
+            setTimeout(function() {
+                feedback.classList.remove('show');
+            }, 2000);
+        }
+        
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timeDisplay').textContent = 
+                minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+            
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('customersDisplay').textContent = customersServed;
+            document.getElementById('comboDisplay').textContent = maxCombo;
+            document.getElementById('phoneDisplay').textContent = phonesAnswered;
+        }
+        
+        function endGame() {
+            gameActive = false;
+            
+            // Clear timers
+            clearInterval(gameTimer);
+            clearInterval(customerSpawner);
+            clearInterval(phoneSpawner);
+            
+            // Show results
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalCustomers').textContent = customersServed;
+            document.getElementById('finalCombo').textContent = 'x' + maxCombo;
+            document.getElementById('finalPhones').textContent = phonesAnswered;
+            
+            // Rating
+            let rating = '';
+            if (score >= 600) rating = '🔥 CCV Expert!';
+            else if (score >= 400) rating = '⭐ CCV Pro!';
+            else if (score >= 200) rating = '👍 Goed gedaan!';
+            else rating = '💪 Volgende keer beter!';
+            
+            document.getElementById('finalRating').textContent = rating;
+            document.getElementById('gameOver').style.display = 'flex';
+        }
+        
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+        
+        // Initialize
+        updateDisplay();
+        console.log("Game loaded and ready!");
+    </script>
+</body>
+</html>
